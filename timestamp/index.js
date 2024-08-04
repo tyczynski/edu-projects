@@ -18,13 +18,40 @@ app.get("/", function (req, res) {
   res.sendFile(__dirname + '/views/index.html');
 });
 
+app.get("/api/:date?", function (req, res) { 
+  const IS_NUMBER_REGEX = /^\d+$/g;
+  let dateToParse;
 
-// your first API endpoint... 
-app.get("/api/hello", function (req, res) {
-  res.json({greeting: 'hello API'});
+  if (req.params.date === undefined) {
+    const date = new Date();
+
+    return res.json({ 
+      unix: date.getTime(), 
+      utc: date.toUTCString(),
+    });
+  }
+
+  if (Date.parse(req.params.date)) {
+    dateToParse = req.params.date;
+  }
+
+  if (IS_NUMBER_REGEX.test(req.params.date)) {
+    dateToParse = Number.parseInt(req.params.date);
+  }
+
+  if (dateToParse === undefined) {
+    return res.json({
+      error: 'Invalid date',
+    });
+  }
+
+  const date = new Date(dateToParse);
+
+  return res.json({ 
+    unix: date.getTime(), 
+    utc: date.toUTCString(),
+  });
 });
-
-
 
 // Listen on port set in environment variable or default to 3000
 var listener = app.listen(process.env.PORT || 3000, function () {
